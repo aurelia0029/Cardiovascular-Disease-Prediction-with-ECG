@@ -387,8 +387,7 @@ pip install -r requirements.txt
 
 ### Dataset Setup
 
-1. Download MIT-BIH Arrhythmia Database from PhysioNet
-2. Place the `mitdb/` directory in the parent folder:
+The MIT-BIH Arrhythmia Database should be placed in the project root directory:
 
 ```
 MIT-BIH/
@@ -401,11 +400,9 @@ MIT-BIH/
     └── cnn_lstm_experiment/
 ```
 
-3. Alternatively, update `DATA_DIR` in `train.py`:
+**For Python execution**: The dataset is already in `../../mitdb` relative to the experiment directory.
 
-```python
-DATA_DIR = '/path/to/your/mitdb'
-```
+**For Docker**: The dataset will be copied into the image during build (see Docker section below).
 
 ---
 
@@ -496,18 +493,24 @@ with torch.no_grad():
 
 ### Building the Docker Image
 
+The Dockerfile will copy the MIT-BIH dataset from the parent directory during build:
+
 ```bash
+# Build from the cnn_lstm_experiment directory
+cd ECG_experiments/cnn_lstm_experiment
 docker build -t ecg-cnn-lstm:latest .
 ```
+
+**Note**: Make sure the `mitdb/` directory exists at `../../mitdb` (i.e., `MIT-BIH/mitdb/`) before building.
 
 ### Running Training in Docker
 
 ```bash
-# Run training
-docker run --rm -v $(pwd)/mitdb:/app/mitdb ecg-cnn-lstm:latest python train.py
+# Run training (dataset already included in image)
+docker run --rm -v $(pwd):/app/output ecg-cnn-lstm:latest python train.py
 
 # Run with GPU support
-docker run --gpus all --rm -v $(pwd)/mitdb:/app/mitdb ecg-cnn-lstm:latest python train.py
+docker run --gpus all --rm -v $(pwd):/app/output ecg-cnn-lstm:latest python train.py
 ```
 
 ### Running Evaluation in Docker
@@ -519,9 +522,21 @@ docker run --rm -v $(pwd):/app/output ecg-cnn-lstm:latest python evaluate.py
 ### Docker Image Details
 
 - **Base Image**: Python 3.9-slim
-- **Size**: ~1.2GB
-- **Includes**: All dependencies from requirements.txt
+- **Size**: ~1.5GB (includes MIT-BIH dataset)
+- **Includes**:
+  - All Python dependencies from requirements.txt
+  - MIT-BIH dataset at `/app/mitdb`
+  - Experiment scripts
 - **Entrypoint**: Bash shell for running Python scripts
+
+### Alternative: Using External Dataset (Not Recommended)
+
+If you prefer not to include the dataset in the image:
+
+```bash
+# Remove the COPY line from Dockerfile, then:
+docker run --rm -v $(pwd)/../../mitdb:/app/mitdb -v $(pwd):/app/output ecg-cnn-lstm:latest python train.py
+```
 
 ---
 

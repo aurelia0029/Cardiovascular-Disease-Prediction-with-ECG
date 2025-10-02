@@ -156,7 +156,7 @@ def main():
     """Main training pipeline."""
 
     # Configuration
-    DATA_DIR = './mitdb'
+    DATA_DIR = '../../mitdb'  # MIT-BIH dataset in parent directory
     SELECTED_SYMBOLS = ['N', 'L', 'R', 'V', 'A', 'F']
     NORMAL_SYMBOLS = ['N']
     SEQUENCE_LENGTH = 3

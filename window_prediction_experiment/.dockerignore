@@ -16,10 +16,13 @@ ENV/
 *.npy
 *.npz
 
-# Outputs
+# Results and outputs
+*.json
 *.png
 *.jpg
 *.pdf
+plots/
+output/
 
 # IDE
 .vscode/

@@ -1,4 +1,4 @@
-# Dockerfile for CNN-LSTM ECG Arrhythmia Classification Experiment
+# Dockerfile for Window Prediction & Sequence Length Experiments
 
 FROM python:3.9-slim
 
@@ -21,17 +21,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY data_loader.py .
 COPY dataset.py .
 COPY model.py .
-COPY train.py .
-COPY evaluate.py .
+COPY window_experiment.py .
+COPY sequence_experiment.py .
+COPY visualize.py .
 
 # Copy MIT-BIH dataset from parent directory
 COPY ../../mitdb /app/mitdb
 
-# Create output directory
-RUN mkdir -p /app/output
+# Create directories for outputs
+RUN mkdir -p /app/output /app/plots
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Default command (can be overridden)
+# Default command
 CMD ["/bin/bash"]
