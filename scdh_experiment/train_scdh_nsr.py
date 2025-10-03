@@ -139,14 +139,14 @@ def main():
     )
 
     # SCDH parameters
-    parser.add_argument('--scdh_dir', type=str, default='../../sddb',
-                        help='Path to SCDH database directory')
+    parser.add_argument('--scdh_dir', type=str, default=None,
+                        help='Path to SCDH database directory (default: auto-detect)')
     parser.add_argument('--min', type=int, default=20,
                         help='Minutes before VF onset to extract SCDH onset data (default: 20)')
 
     # NSR parameters
-    parser.add_argument('--nsr_dir', type=str, default='../../nsrdb',
-                        help='Path to NSR database directory')
+    parser.add_argument('--nsr_dir', type=str, default=None,
+                        help='Path to NSR database directory (default: auto-detect)')
     parser.add_argument('--nsr_windows', type=int, default=60,
                         help='Number of windows to extract per NSR record (default: 60)')
 

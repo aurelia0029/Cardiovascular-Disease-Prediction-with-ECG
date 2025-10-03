@@ -1,0 +1,44 @@
+seed: 42
+
+paths:
+  abnormal_sources:
+    - ../../mitdb
+  normal_sources:
+    - ../../mitdb
+    - ../../nsrdb
+  artifacts_dir: ./artifacts
+  feature_cache: ./artifacts/features.npz
+
+extraction:
+  sampling_rate: 360
+  ventricular_symbols: ["V", "E", "F", "!"]
+  non_heartbeat_symbols: ["+", "[", "]", "~", "\"", "|"]
+  qrs_half_width: 18            # samples (~50 ms @ 360 Hz)
+  pre_event_window_sec: 30
+  feature_window_sec: 30
+  min_segment_size: 30
+
+sampling:
+  strategy: balanced            # balanced | cleaned_oversample
+  train_ratio: 0.6
+  val_ratio: 0.2
+  clean_normals:
+    keep_ratio: 0.3
+    outlier_percentile: 97
+  oversample_abnormal: true
+
+models:
+  logistic_regression:
+    max_iter: 1000
+    class_weight: balanced
+  random_forest:
+    n_estimators: 200
+    max_depth: null
+    class_weight: balanced
+  simple_fnn:
+    hidden_dim: 16
+    dropout: 0.2
+    lr: 0.001
+    batch_size: 128
+    epochs: 100
+    patience: 10

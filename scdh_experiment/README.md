@@ -201,21 +201,27 @@ pip install -r requirements.txt
 
 ### Dataset Setup
 
-The databases should be in the project root:
+The databases should be in the ECG_experiments directory:
 
 ```
-MIT-BIH/
+ECG_experiments/
 ├── sddb/               # SCDH database files
 ├── nsrdb/              # NSR database files
-└── ECG_experiments/
-    └── scdh_experiment/
+└── scdh_experiment/
+    ├── feature_extraction.py
+    ├── data_loader.py
+    ├── train_scdh_only.py
+    └── train_scdh_nsr.py
 ```
 
-**Default paths**:
-- SCDH: `../../sddb`
-- NSR: `../../nsrdb`
+**Path Auto-Detection**:
 
-You can override these with `--scdh_dir` and `--nsr_dir` arguments.
+The scripts automatically detect the database paths:
+1. **Docker environment**: `/app/sddb` and `/app/nsrdb`
+2. **Local run from scdh_experiment/**: `../sddb` and `../nsrdb`
+3. **Current directory**: `sddb` and `nsrdb`
+
+You can override with `--data_dir`, `--scdh_dir`, or `--nsr_dir` arguments if needed.
 
 ---
 
@@ -430,9 +436,11 @@ scdh_experiment/
 
 ### Building the Image
 
+**Important**: Build from the `ECG_experiments/` directory (parent of `scdh_experiment/`)
+
 ```bash
-cd ECG_experiments/scdh_experiment
-docker build -t scdh-experiment:latest .
+cd ECG_experiments
+docker build -f scdh_experiment/Dockerfile -t scdh-experiment:latest .
 ```
 
 ### Running Experiments

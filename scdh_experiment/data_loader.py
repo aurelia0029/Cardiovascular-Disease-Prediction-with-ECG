@@ -19,6 +19,39 @@ from scipy.signal import resample
 from feature_extraction import extract_features
 
 
+def get_default_data_dir(db_name):
+    """
+    Get default data directory, auto-detecting if running in Docker or locally.
+
+    Parameters:
+    -----------
+    db_name : str
+        Database name ('sddb' or 'nsrdb')
+
+    Returns:
+    --------
+    path : str
+        Default path to database
+    """
+    # Check if running in Docker (data in /app/)
+    docker_path = os.path.join('/app', db_name)
+    if os.path.exists(docker_path):
+        return docker_path
+
+    # Check parent directory (when running locally from scdh_experiment/)
+    local_path = os.path.join('..', db_name)
+    if os.path.exists(local_path):
+        return local_path
+
+    # Check current directory
+    current_path = db_name
+    if os.path.exists(current_path):
+        return current_path
+
+    # Default to parent directory path
+    return local_path
+
+
 # VF onset times for each SCDH record (from annotations)
 VF_ONSET_TIMES = {
     '30': '18:31:53',
@@ -46,7 +79,7 @@ VF_ONSET_TIMES = {
 }
 
 
-def load_scdh_data(data_dir='../../sddb', segment_len=3, window_len=180,
+def load_scdh_data(data_dir=None, segment_len=3, window_len=180,
                    time_before_onset=20, target_fs=250, skip_list=None):
     """
     Load ECG data from SCDH database.
@@ -77,6 +110,9 @@ def load_scdh_data(data_dir='../../sddb', segment_len=3, window_len=180,
     y : list
         List of labels (1 = onset, 0 = normal)
     """
+    if data_dir is None:
+        data_dir = get_default_data_dir('sddb')
+
     if skip_list is None:
         skip_list = ['40', '42', '49']
 
@@ -171,7 +207,7 @@ def load_scdh_data(data_dir='../../sddb', segment_len=3, window_len=180,
     return X, y
 
 
-def load_nsr_data(data_dir='../../nsrdb', segment_len=3, window_len=180,
+def load_nsr_data(data_dir=None, segment_len=3, window_len=180,
                   num_windows=60, target_fs=250):
     """
     Load normal ECG data from NSR (Normal Sinus Rhythm) database.
@@ -194,6 +230,9 @@ def load_nsr_data(data_dir='../../nsrdb', segment_len=3, window_len=180,
     X : list
         List of feature dictionaries (all labeled as normal)
     """
+    if data_dir is None:
+        data_dir = get_default_data_dir('nsrdb')
+
     X = []
     nsr_files = [f.replace('.hea', '') for f in os.listdir(data_dir) if f.endswith('.hea')]
 

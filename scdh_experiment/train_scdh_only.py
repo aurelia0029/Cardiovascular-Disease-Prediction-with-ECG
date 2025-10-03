@@ -139,8 +139,8 @@ def main():
         description='Experiment 1: Training & Testing on SCDH Only (10-Fold CV)'
     )
 
-    parser.add_argument('--data_dir', type=str, default='../../sddb',
-                        help='Path to SCDH database directory')
+    parser.add_argument('--data_dir', type=str, default=None,
+                        help='Path to SCDH database directory (default: auto-detect)')
     parser.add_argument('--min', type=int, default=20,
                         help='Minutes before/after VF onset to extract data (default: 20)')
     parser.add_argument('--segment_len', type=int, default=3,
