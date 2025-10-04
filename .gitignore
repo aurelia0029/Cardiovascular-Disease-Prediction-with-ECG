@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+MIT_env/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Model files (trained models are usually too large for git)
+*.pth
+*.pt
+*.pkl
+*.h5
+*.model
+
+# Data files (datasets should not be in git)
+*.npy
+*.npz
+*.csv
+*.dat
+*.hea
+*.atr
+
+# Experiment outputs
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.json
+training_curve*.png
+*.log
+
+# Cache and temporary files
+*.cache
+precomputed_cache/
+normal_predictions_csv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Docker
+.dockerignore
+
+# OS
+Thumbs.db
+.DS_Store
