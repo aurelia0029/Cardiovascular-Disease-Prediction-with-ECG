@@ -8,7 +8,7 @@ This experiment evaluates the ability to predict ventricular fibrillation (VF) o
 
 1. [Overview](#overview)
 2. [The Challenge](#the-challenge)
-3. [Two Experiments](#two-experiments)
+3. [Three Experiments](#three-experiments)
 4. [Feature Extraction](#feature-extraction)
 5. [Dataset Details](#dataset-details)
 6. [Getting Started](#getting-started)
@@ -54,9 +54,9 @@ Successful prediction could enable:
 
 ---
 
-## Two Experiments
+## Three Experiments
 
-### Experiment 1: SCDH Only
+### Experiment 1: SCDH Only (Generalized Model)
 
 **Dataset**: Only the Sudden Cardiac Death Holter Database
 
@@ -66,6 +66,8 @@ Successful prediction could enable:
 
 **Purpose**: Test if VF onset can be distinguished from post-VF normal rhythm using the same patient population.
 
+**Approach**: Train a single generalized model using data from all patients with 10-fold cross-validation.
+
 **Run Command**:
 ```bash
 python train_scdh_only.py --min 20
@@ -73,7 +75,7 @@ python train_scdh_only.py --min 20
 
 ---
 
-### Experiment 2: SCDH + NSR
+### Experiment 2: SCDH + NSR (Generalized Model)
 
 **Dataset**: SCDH + Normal Sinus Rhythm Database
 
@@ -83,9 +85,46 @@ python train_scdh_only.py --min 20
 
 **Purpose**: Test if VF onset patterns can be distinguished from truly normal ECG from healthy individuals.
 
+**Approach**: Train a single generalized model combining SCDH and NSR data with 10-fold cross-validation.
+
 **Run Command**:
 ```bash
 python train_scdh_nsr.py --min 20
+```
+
+---
+
+### Experiment 3: Personalized Patient Models (LOPO)
+
+**Dataset**: Only the Sudden Cardiac Death Holter Database
+
+**Data Composition**:
+- **Onset segments** (label = 1): ECG from `{min}` minutes BEFORE VF onset
+- **Normal segments** (label = 0): ECG from `{min}` minutes AFTER VF ends
+
+**Purpose**: Test if personalized models trained on individual patient's historical data can better predict their own future VF onset compared to generalized models.
+
+**Approach**: For EACH patient individually:
+- Use 2/3 of their data for training
+- Use 1/3 of their data for testing
+- Build a patient-specific prediction model
+- NO data mixing between patients
+
+**Motivation**: Previous experiments built generalized models from multiple patients. This experiment investigates whether individual physiological patterns are more predictive than population-level patterns.
+
+**Run Command**:
+```bash
+python exp_personalized_models.py
+```
+
+**Interactive Analysis**:
+```bash
+jupyter notebook personalized_models_analysis.ipynb
+```
+
+**Comparison with Generalized Models**:
+```bash
+python compare_personalized_vs_generalized.py
 ```
 
 ---
@@ -306,6 +345,74 @@ python train_scdh_nsr.py \
 
 ---
 
+### Experiment 3: Personalized Patient Models
+
+#### Basic Run (Default: 20 minutes before/after onset)
+```bash
+python exp_personalized_models.py
+```
+
+**This creates**:
+- Individual models for each patient
+- 2/3 train, 1/3 test split per patient
+- No mixing of patient data
+
+#### Run with Interactive Analysis (Jupyter Notebook)
+```bash
+jupyter notebook personalized_models_analysis.ipynb
+```
+
+Then execute cells to:
+- Load and visualize results
+- Compare patient performance
+- Analyze correlations
+- Export summary statistics
+
+#### Compare Personalized vs Generalized Models
+```bash
+python compare_personalized_vs_generalized.py
+```
+
+Generates:
+- Statistical comparison (paired t-tests, effect sizes)
+- Comparison boxplots
+- Per-patient comparison charts
+- Summary CSV files
+
+#### Configuration
+
+Edit `CONFIG` in `exp_personalized_models.py`:
+
+```python
+CONFIG = {
+    'OUTPUT_DIR': './personalized_models_output',
+    'TRAIN_RATIO': 2/3,
+    'TEST_RATIO': 1/3,
+    'SEGMENT_LEN': 3,
+    'WINDOW_LEN': 180,
+    'TIME_BEFORE_ONSET': 20,  # minutes
+    'TARGET_FS': 250,
+    'MIN_SEGMENTS_PER_CLASS': 5
+}
+```
+
+**Output**:
+```
+personalized_models_output/
+├── personalized_results_YYYYMMDD_HHMMSS.json
+├── personalized_results_YYYYMMDD_HHMMSS.pkl
+└── plots/
+    ├── accuracy_by_patient.png
+    └── roc_auc_by_patient.png
+
+comparison_output/
+├── comparison_boxplots.png
+├── patient_accuracy_comparison.png
+└── comparison_summary.csv
+```
+
+---
+
 ## Configuring Time Windows
 
 ### The `--min` Parameter
@@ -408,27 +515,41 @@ F1-Score:  0.8519 ± 0.0129
 ```
 scdh_experiment/
 │
-├── feature_extraction.py   # Feature extraction functions (27 features)
-├── data_loader.py           # SCDH and NSR data loading
-├── train_scdh_only.py       # Experiment 1: SCDH only (onset vs normal)
-├── train_scdh_nsr.py        # Experiment 2: SCDH onset vs NSR normal
+├── feature_extraction.py              # Feature extraction functions (27 features)
+├── data_loader.py                     # SCDH and NSR data loading
 │
-├── requirements.txt         # Python dependencies
-├── Dockerfile               # Docker container definition
-├── .dockerignore            # Docker build exclusions
-└── README.md                # This file
+├── train_scdh_only.py                 # Experiment 1: SCDH only (generalized)
+├── train_scdh_nsr.py                  # Experiment 2: SCDH + NSR (generalized)
+├── exp_personalized_models.py         # Experiment 3: Personalized models
+│
+├── compare_personalized_vs_generalized.py  # Compare Exp3 vs Exp1/2
+├── personalized_models_analysis.ipynb      # Interactive analysis notebook
+├── run_personalized_experiment.sh          # Automated runner for Exp3
+│
+├── requirements.txt                   # Python dependencies
+├── Dockerfile                         # Docker container definition
+├── .dockerignore                      # Docker build exclusions
+└── README.md                          # This file
 ```
 
 ### Key Files
 
+**Core Components**:
 - **feature_extraction.py**: All 27 feature extraction functions (statistical, nonlinear, frequency, variation)
 - **data_loader.py**:
   - `load_scdh_data()`: Extract onset/normal from SCDH with configurable `time_before_onset`
   - `load_nsr_data()`: Extract normal segments from NSR
   - `prepare_dataframe()`: Convert to pandas DataFrame
 
-- **train_scdh_only.py**: Experiment 1 with configurable `--min` parameter
-- **train_scdh_nsr.py**: Experiment 2 with configurable `--min` parameter
+**Experiment Scripts**:
+- **train_scdh_only.py**: Experiment 1 - Generalized model with 10-fold CV
+- **train_scdh_nsr.py**: Experiment 2 - Generalized model with NSR data
+- **exp_personalized_models.py**: Experiment 3 - Personalized patient models
+
+**Analysis Tools**:
+- **compare_personalized_vs_generalized.py**: Statistical comparison between Experiment 3 and Experiments 1/2
+- **personalized_models_analysis.ipynb**: Interactive Jupyter notebook for exploring Experiment 3 results
+- **run_personalized_experiment.sh**: Automated runner with dependency checking for Experiment 3
 
 ---
 
@@ -475,6 +596,21 @@ docker run --rm \
     python train_scdh_nsr.py --min 25
 ```
 
+#### Experiment 3 (Personalized Models)
+```bash
+# Basic run
+docker run --rm \
+    -v $(pwd):/app/output \
+    scdh-experiment:latest \
+    python exp_personalized_models.py
+
+# Run comparison
+docker run --rm \
+    -v $(pwd):/app/output \
+    scdh-experiment:latest \
+    python compare_personalized_vs_generalized.py
+```
+
 ### Docker Parameters
 
 - `-v $(pwd):/app/output`: Mount current directory to save results
@@ -484,6 +620,37 @@ docker run --rm \
 ---
 
 ## Advanced Topics
+
+### Comparing All Three Experiments
+
+The three experiments test different hypotheses:
+
+| Experiment | Model Type | Training Data | Hypothesis |
+|------------|-----------|---------------|------------|
+| **Exp 1** | Generalized | All SCDH patients pooled | Population patterns distinguish onset vs post-VF |
+| **Exp 2** | Generalized | SCDH + NSR pooled | Population patterns distinguish onset vs healthy normal |
+| **Exp 3** | Personalized | Individual patients | Patient-specific patterns predict own VF onset |
+
+**Key Research Question for Exp 3**:
+Can personalized models outperform generalized models by learning individual-specific VF precursor patterns?
+
+**Expected Outcomes**:
+1. **Exp 3 > Exp 1/2**: Individual patterns are highly predictive → Clinical systems should use patient-specific calibration
+2. **Exp 3 ≈ Exp 1/2**: Population patterns sufficient → Generalized models practical for new patients
+3. **Exp 3 < Exp 1/2**: Insufficient per-patient data → Need more data or transfer learning
+
+**To Compare**:
+```bash
+# Run all three experiments
+python train_scdh_only.py --min 20
+python train_scdh_nsr.py --min 20
+python exp_personalized_models.py
+
+# Compare Exp 3 with Exp 1/2
+python compare_personalized_vs_generalized.py
+```
+
+---
 
 ### Comparing Different Time Windows
 
