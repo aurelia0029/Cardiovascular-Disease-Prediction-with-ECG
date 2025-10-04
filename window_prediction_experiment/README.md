@@ -225,20 +225,20 @@ pip install -r requirements.txt
 
 ### Dataset Setup
 
-The MIT-BIH Arrhythmia Database should be placed in the project root directory:
+The MIT-BIH Arrhythmia Database should be placed in the dataset directory:
 
 ```
-MIT-BIH/
-├── mitdb/              # MIT-BIH database files
-│   ├── 100.dat
-│   ├── 100.hea
-│   ├── 100.atr
-│   └── ...
-└── ECG_experiments/
-    └── window_prediction_experiment/
+ECG_experiments/
+├── dataset/
+│   └── mitdb/              # MIT-BIH database files
+│       ├── 100.dat
+│       ├── 100.hea
+│       ├── 100.atr
+│       └── ...
+└── window_prediction_experiment/
 ```
 
-**For Python execution**: The default path is `../../mitdb` (relative to experiment directory). You can override with `--data_dir` argument.
+**For Python execution**: The default path is `../dataset/mitdb` (relative to experiment directory). You can override with `--data_dir` argument.
 
 **For Docker**: The dataset will be copied into the image during build (see Docker section below).
 
@@ -412,25 +412,25 @@ The visualization script provides:
 The Dockerfile will copy the MIT-BIH dataset from the parent directory during build:
 
 ```bash
-# Build from the window_prediction_experiment directory
-cd ECG_experiments/window_prediction_experiment
-docker build -t ecg-window-prediction:latest .
+# Build from the ECG_experiments directory (parent of window_prediction_experiment)
+cd ECG_experiments
+docker build -f window_prediction_experiment/Dockerfile -t ecg-window-prediction:latest .
 ```
 
-**Note**: Make sure the `mitdb/` directory exists at `../../mitdb` (i.e., `MIT-BIH/mitdb/`) before building.
+**Note**: Make sure the `dataset/mitdb/` directory exists in the `ECG_experiments/` directory before building.
 
 ### Running Window Experiment in Docker
 
 ```bash
 # Basic run (dataset already included in image)
 docker run --rm \
-    -v $(pwd):/app/output \
+    -v $(pwd)/window_prediction_experiment:/app/output \
     ecg-window-prediction:latest \
     python window_experiment.py --min_window 1 --max_window 100 --step 10
 
 # With GPU support
 docker run --gpus all --rm \
-    -v $(pwd):/app/output \
+    -v $(pwd)/window_prediction_experiment:/app/output \
     ecg-window-prediction:latest \
     python window_experiment.py --min_window 0 --max_window 50 --step 5
 ```
@@ -439,7 +439,7 @@ docker run --gpus all --rm \
 
 ```bash
 docker run --rm \
-    -v $(pwd):/app/output \
+    -v $(pwd)/window_prediction_experiment:/app/output \
     ecg-window-prediction:latest \
     python sequence_experiment.py --min_seq 1 --max_seq 15 --step 1
 ```
@@ -448,7 +448,7 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-    -v $(pwd):/app/output \
+    -v $(pwd)/window_prediction_experiment:/app/output \
     ecg-window-prediction:latest \
     python visualize.py \
     --window_results /app/output/window_results_seq3.json \
@@ -472,10 +472,10 @@ docker run --rm \
 If you prefer not to include the dataset in the image:
 
 ```bash
-# Remove the COPY line from Dockerfile, then:
+# Remove the COPY dataset/mitdb line from Dockerfile, then mount from host:
 docker run --rm \
-    -v $(pwd)/../../mitdb:/app/mitdb \
-    -v $(pwd):/app/output \
+    -v $(pwd)/dataset/mitdb:/app/mitdb \
+    -v $(pwd)/window_prediction_experiment:/app/output \
     ecg-window-prediction:latest \
     python window_experiment.py
 ```

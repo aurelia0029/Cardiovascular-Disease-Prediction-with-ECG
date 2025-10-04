@@ -26,9 +26,9 @@ COPY scdh_experiment/data_loader.py .
 COPY scdh_experiment/train_scdh_only.py .
 COPY scdh_experiment/train_scdh_nsr.py .
 
-# Copy databases from parent directory
-COPY sddb /app/sddb
-COPY nsrdb /app/nsrdb
+# Copy databases
+COPY dataset/sddb /app/sddb
+COPY dataset/nsrdb /app/nsrdb
 
 # Create output directory
 RUN mkdir -p /app/output

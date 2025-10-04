@@ -38,18 +38,23 @@ def get_default_data_dir(db_name):
     if os.path.exists(docker_path):
         return docker_path
 
-    # Check parent directory (when running locally from scdh_experiment/)
-    local_path = os.path.join('..', db_name)
-    if os.path.exists(local_path):
-        return local_path
+    # Check dataset subdirectory in parent (new standard location)
+    dataset_path = os.path.join('..', 'dataset', db_name)
+    if os.path.exists(dataset_path):
+        return dataset_path
+
+    # Check parent directory directly (old location)
+    old_local_path = os.path.join('..', db_name)
+    if os.path.exists(old_local_path):
+        return old_local_path
 
     # Check current directory
     current_path = db_name
     if os.path.exists(current_path):
         return current_path
 
-    # Default to parent directory path
-    return local_path
+    # Default to new standard location
+    return dataset_path
 
 
 # VF onset times for each SCDH record (from annotations)

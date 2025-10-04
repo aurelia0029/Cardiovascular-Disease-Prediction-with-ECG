@@ -212,19 +212,20 @@ pip install -r requirements.txt
 
 ### Dataset Setup
 
-The MIT-BIH database should be in the parent directory:
+The MIT-BIH database should be in the dataset directory:
 
 ```
 ECG_experiments/
-├── mitdb/                  # MIT-BIH database
-└── feature_qrs_experiment_v2/
+├── dataset/
+│   └── mitdb/                  # MIT-BIH database
+└── feature_qrs_experiment/
     ├── data_loader.py
     ├── model.py
     ├── train_balanced.py
     └── train_semi_balanced.py
 ```
 
-Path auto-detection finds `../mitdb` automatically.
+Path auto-detection finds `../dataset/mitdb` automatically.
 
 ---
 
@@ -381,7 +382,7 @@ Modify in `data_loader.py`:
 ```python
 # Change from 30 seconds to 60 seconds
 abnormal_features, abnormal_labels, normal_features = load_features_with_clean_history(
-    data_dir='../mitdb',
+    data_dir='../dataset/mitdb',
     pre_window_sec=60,  # ← Longer history requirement
     abnormal_symbols=['V', 'E', 'F', '!']
 )
@@ -399,7 +400,7 @@ Focus on specific abnormalities:
 ```python
 # Only ventricular premature (V)
 abnormal_features, abnormal_labels, normal_features = load_features_with_clean_history(
-    data_dir='../mitdb',
+    data_dir='../dataset/mitdb',
     pre_window_sec=30,
     abnormal_symbols=['V']  # ← Only V
 )
@@ -415,6 +416,47 @@ python train_semi_balanced.py --hidden_sizes 64 32 16 --dropout 0.4
 
 # Smaller model
 python train_semi_balanced.py --hidden_sizes 8 --dropout 0.2
+```
+
+---
+
+## Docker Deployment
+
+### Building the Image
+
+```bash
+# Build from the ECG_experiments directory (parent of feature_qrs_experiment)
+cd ECG_experiments
+docker build -f feature_qrs_experiment/Dockerfile -t ecg-feature-qrs:latest .
+```
+
+**Note**: Make sure the `dataset/mitdb/` directory exists in the `ECG_experiments/` directory before building.
+
+### Running Experiment 1 (Fully Balanced)
+
+```bash
+docker run --rm \
+    -v $(pwd)/feature_qrs_experiment:/app/output \
+    ecg-feature-qrs:latest \
+    python train_balanced.py
+```
+
+### Running Experiment 2 (Semi-Balanced)
+
+```bash
+docker run --rm \
+    -v $(pwd)/feature_qrs_experiment:/app/output \
+    ecg-feature-qrs:latest \
+    python train_semi_balanced.py
+```
+
+### With Custom Parameters
+
+```bash
+docker run --rm \
+    -v $(pwd)/feature_qrs_experiment:/app/output \
+    ecg-feature-qrs:latest \
+    python train_semi_balanced.py --hidden_sizes 64 32 16 --epochs 200 --dropout 0.4
 ```
 
 ---

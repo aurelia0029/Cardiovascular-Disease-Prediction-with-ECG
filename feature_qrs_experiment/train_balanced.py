@@ -206,7 +206,7 @@ def main():
         description='Experiment 1: Fully Balanced Dataset (SimpleFNN)'
     )
 
-    parser.add_argument('--data_dir', type=str, default='../mitdb',
+    parser.add_argument('--data_dir', type=str, default='../dataset/mitdb',
                         help='Path to MIT-BIH database')
     parser.add_argument('--hidden_sizes', type=int, nargs='+', default=[16, 8],
                         help='Hidden layer sizes (default: 16 8)')

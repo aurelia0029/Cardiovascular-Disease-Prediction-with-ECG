@@ -270,16 +270,16 @@ pip install -r requirements.txt
 
 ### Dataset Setup
 
-The MIT-BIH dataset should be at the project root:
+The MIT-BIH dataset should be in the dataset directory:
 
 ```
-MIT-BIH/
-├── mitdb/              # MIT-BIH database files
-└── ECG_experiments/
-    └── true_prediction_experiment/
+ECG_experiments/
+├── dataset/
+│   └── mitdb/              # MIT-BIH database files
+└── true_prediction_experiment/
 ```
 
-**For Python**: Default path is `../../mitdb`
+**For Python**: Default path is `../dataset/mitdb`
 **For Docker**: Dataset copied during build
 
 ---
@@ -433,22 +433,25 @@ Our model chooses: **High Recall, Low Precision**
 ### Building the Image
 
 ```bash
-cd ECG_experiments/true_prediction_experiment
-docker build -t ecg-true-prediction:latest .
+# Build from the ECG_experiments directory (parent of true_prediction_experiment)
+cd ECG_experiments
+docker build -f true_prediction_experiment/Dockerfile -t ecg-true-prediction:latest .
 ```
+
+**Note**: Make sure the `dataset/mitdb/` directory exists in the `ECG_experiments/` directory before building.
 
 ### Running Training
 
 ```bash
 # Basic run
 docker run --rm \
-    -v $(pwd):/app/output \
+    -v $(pwd)/true_prediction_experiment:/app/output \
     ecg-true-prediction:latest \
     python train.py --abnormal_config ventricular
 
 # With GPU
 docker run --gpus all --rm \
-    -v $(pwd):/app/output \
+    -v $(pwd)/true_prediction_experiment:/app/output \
     ecg-true-prediction:latest \
     python train.py --abnormal_config all --seq_len 7
 ```
@@ -457,7 +460,7 @@ docker run --gpus all --rm \
 
 ```bash
 docker run --rm \
-    -v $(pwd):/app/output \
+    -v $(pwd)/true_prediction_experiment:/app/output \
     ecg-true-prediction:latest \
     python evaluate.py
 ```

@@ -150,7 +150,7 @@ Examples:
     )
 
     # Data parameters
-    parser.add_argument('--data_dir', type=str, default='../../mitdb',
+    parser.add_argument('--data_dir', type=str, default='../dataset/mitdb',
                         help='Path to MIT-BIH dataset directory')
     parser.add_argument('--half_window_size', type=int, default=128,
                         help='Half window size for beat extraction (default: 128, total 256 samples)')

@@ -240,12 +240,13 @@ pip install -r requirements.txt
 
 ### Dataset Setup
 
-The databases should be in the ECG_experiments directory:
+The databases should be in the dataset directory:
 
 ```
 ECG_experiments/
-├── sddb/               # SCDH database files
-├── nsrdb/              # NSR database files
+├── dataset/
+│   ├── sddb/               # SCDH database files
+│   └── nsrdb/              # NSR database files
 └── scdh_experiment/
     ├── feature_extraction.py
     ├── data_loader.py
@@ -257,8 +258,9 @@ ECG_experiments/
 
 The scripts automatically detect the database paths:
 1. **Docker environment**: `/app/sddb` and `/app/nsrdb`
-2. **Local run from scdh_experiment/**: `../sddb` and `../nsrdb`
-3. **Current directory**: `sddb` and `nsrdb`
+2. **Local run from scdh_experiment/**: `../dataset/sddb` and `../dataset/nsrdb` (new standard)
+3. **Fallback**: `../sddb` and `../nsrdb` (old location, for backward compatibility)
+4. **Current directory**: `sddb` and `nsrdb`
 
 You can override with `--data_dir`, `--scdh_dir`, or `--nsr_dir` arguments if needed.
 
@@ -748,9 +750,9 @@ Based on similar VF prediction studies:
 
 **1. Missing Database Files**
 ```
-Error: No such file or directory: '../../sddb'
+Error: No such file or directory: '../dataset/sddb'
 ```
-**Solution**: Ensure SCDH database is in correct location or use `--scdh_dir` to specify path.
+**Solution**: Ensure SCDH database is at `ECG_experiments/dataset/sddb/` or use `--scdh_dir` to specify path.
 
 **2. Memory Error**
 ```

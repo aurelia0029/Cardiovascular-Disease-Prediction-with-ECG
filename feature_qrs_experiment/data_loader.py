@@ -58,7 +58,7 @@ def extract_qrs_features(signal, r_peaks, width=18):
     ]
 
 
-def load_features_with_clean_history(data_dir='../mitdb', pre_window_sec=30,
+def load_features_with_clean_history(data_dir='../dataset/mitdb', pre_window_sec=30,
                                      abnormal_symbols=None, normal_symbol='N',
                                      non_heartbeat_symbols=None):
     """

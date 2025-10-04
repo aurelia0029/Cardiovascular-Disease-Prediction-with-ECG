@@ -12,20 +12,20 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file
-COPY requirements.txt .
+COPY cnn_lstm_experiment/requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy all experiment files
-COPY data_loader.py .
-COPY dataset.py .
-COPY model.py .
-COPY train.py .
-COPY evaluate.py .
+COPY cnn_lstm_experiment/data_loader.py .
+COPY cnn_lstm_experiment/dataset.py .
+COPY cnn_lstm_experiment/model.py .
+COPY cnn_lstm_experiment/train.py .
+COPY cnn_lstm_experiment/evaluate.py .
 
-# Copy MIT-BIH dataset from parent directory
-COPY ../../mitdb /app/mitdb
+# Copy MIT-BIH dataset
+COPY dataset/mitdb /app/mitdb
 
 # Create output directory
 RUN mkdir -p /app/output
